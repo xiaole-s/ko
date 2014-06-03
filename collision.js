@@ -20,7 +20,7 @@ ko.collider = {
         return cn & 1;
     },
     //http://geomalgorithms.com/a03-_inclusion.html
-    //return 0 1 2   0:点在多边形外 1：点在多边形内 2：点在多边形重叠部分
+    //return 0 1 2...   0:点在多边形外  点p被围绕wn次
     pointInPolyWN: function (p, pps) {
         var isLeft = function (p0, p1, p2) {
             return ((p1.x - p0.x) * (p2.y - p0.y) -
