@@ -83,56 +83,62 @@ ko.Collider = function(obj, pos, oper, dm, dmParam) {
     this.detectionParam = dmParam;
 }
 
-ko.collisionManager = function(mH, mW, cH, cW, d) {
+ko.collisionManager = (function (mH, mW, cH, cW, d) {
     var colliderMap = [];
     var MAP_WIDTH = mH,//1366
         MAP_HEIGHT = mW,//768,
-        ROLE_WIDTH = cH,//96,
-        ROLE_HEIGHT = cW,//96,
-        h = Math.floor(MAP_HEIGHT / ROLE_HEIGHT) + 1,
-        w = Math.floor(MAP_WIDTH / ROLE_WIDTH) + 1,
-        divisor = 5;
-
-    for (var i = 0; i <= w ; i++) {
-        colliderMap.push(new Array());
-        for (var j = 0; j <= h; j++) {
-            colliderMap[i].push(new Array());
+        WIDTH = cH,//96,
+        HEIGHT = cW,//96,
+        h = Math.floor(MAP_HEIGHT / HEIGHT) + 1,
+        w = Math.floor(MAP_WIDTH / WIDTH) + 1,
+        divisor = d || 5;
+    function _init() {
+        for (var i = 0; i <= w ; i++) {
+            colliderMap.push(new Array());
+            for (var j = 0; j <= h; j++) {
+                colliderMap[i].push(new Array());
+            }
         }
     }
+    return function () {
+        _init();
+        this.add = function (collider) {
+                colliderMap[Math.floor(collider.pos.x / WIDTH)][Math.floor(collider.pos.y / HEIGHT)].push(collider);
+        }
 
-
-    this.add = function (collider) {
-        colliderMap[Math.floor(collider.pos.x / ROLE_WIDTH)][Math.floor(collider.pos.y / ROLE_HEIGHT)].push(collider);
-    }
-
-    this.detection = function (center) {
-        var cX = (Math.floor(center.pos.x / ROLE_WIDTH) - divisor),
-            cY = (Math.floor(center.pos.y / ROLE_HEIGHT) - divisor);
-        cX = cX >= 0 ? cX : 0;
-        cY = cY >= 0 ? cY : 0;
-        for (var i = cX, lenX = cX + 2 * divisor; i < lenX; i++) {
-            for (var j = cY, lenY = cY + 2 * divisor; j < lenY; j++) {
-                var len = colliderMap[i][j].length;
-                if (len) {
-                    for (var k = 0; k < len; k++) {
-                        var o = colliderMap[i][j][k];//需要检测的碰撞体
-                        switch (o.dm) {
-                            case 'c2c':
-                                ko.collision.circleToCircle(center.pos, o.pos, o.dmParam, center.dmParam);
-                                break;
-                            case 'P2P':
-                                ko.collision.polyToPoly(center.dmParam, o.dmParam);
-                                break;
-                            case 'pInP':
-                                ko.collision.pointInPolyCN(center.pos, o.dm);
-                                break;
-                            case 'lOl':
-                                ko.collision.lineOnLine(center.dmParam, o.dmParam);
-                                break;
+        this.detection = function (center) {
+            var cX = (Math.floor(center.pos.x / WIDTH) - divisor),
+                cY = (Math.floor(center.pos.y / HEIGHT) - divisor);
+            cX = cX > 0 ? cX : 0;
+            cY = cY > 0 ? cY : 0;
+            for (var i = cX, lenX = cX + 2 * divisor; i < lenX; i++) {
+                for (var j = cY, lenY = cY + 2 * divisor; j < lenY; j++) {
+                    var len = colliderMap[i][j].length;
+                    if (len) {
+                        for (var k = 0; k < len; k++) {
+                            var o = colliderMap[i][j][k];//需要检测的碰撞体
+                            switch (o.dm) {
+                                case 'c2c':
+                                    if (ko.collision.circleToCircle(center.pos, o.pos, o.dmParam, center.dmParam)) {   //音量控制
+                                        var vol = 1 - Math.sqrt(Math.pow(center.pos.x - o.pos.x, 2) + Math.pow(center.pos.y - o.pos.y, 2)) / (o.dmParam + center.dmParam)
+                                        o.operation(vol);
+                                    }
+                                    break;
+                                case 'P2P':
+                                    ko.collision.polyToPoly(center.dmParam, o.dmParam);
+                                    break;
+                                case 'pInP':
+                                    ko.collision.pointInPolyCN(center.pos, o.dm);
+                                    break;
+                                case 'lOl':
+                                    ko.collision.lineOnLine(center.dmParam, o.dmParam);
+                                    break;
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
+    
+})();
