@@ -3,6 +3,7 @@ ko.AudioManager = function () {
     //私有变量来存储多个音频文件
     var ko1Audios = {};
 
+    
     //加载
     function load(url, name) {
         name = name || url.split("/").slice(-1)[0].split("."
@@ -42,12 +43,14 @@ ko.AudioManager = function () {
     this.play = function (url, name, vol) {
         vol = vol || 1;//默认值为1
         load(url, name);
-        au._play = function (vol) {
+
+        ko1Audios[name]._play = function (vol) {
             //if (au.paused == false) {
-            au.volume = vol;//物理距离拟声传播
+            ko1Audios[name].volume = vol;//物理距离拟声传播
             //}
-            au.play();
+            ko1Audios[name].play();
         };
+        ko1Audios[name].loop = true;
         //播放声音
         ko1Audios[name]._play(vol);
     }
