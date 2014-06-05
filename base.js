@@ -24,6 +24,8 @@ Line = function (p1, p2) {
     this.pb = p2;
 }
 
+
+
 //获取滚动条偏移
 ko.getScrollOffsets = function (w) {
     //使用指定窗口，默认当前窗口
@@ -79,11 +81,11 @@ ko.getViewportSize = function (w) {
 //获取元素的文档坐标
 ko.getDocPos = function (elt) {
 
-    var scroll = getScrollOffsets();
-    var eleViewPos = elt.getBoundingClientRect() || getElementPos(li);
+    var scroll = ko.getScrollOffsets();
+    var eleViewPos = elt.getBoundingClientRect() || ko.getElementPos(elt);
     return {
-        x: (eleViewPos.left + scroll.x - 15) + 'px',
-        y: (eleViewPos.top + scroll.y - 25) + 'px'
+        x: (eleViewPos.left + scroll.x - 6) ,//+ 'px'
+        y: (eleViewPos.top + scroll.y - 8)// + 'px'
     }
 };
 
